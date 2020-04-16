@@ -1,6 +1,9 @@
 # Covid Plots
 Plot deaths in the last 20 days in NYC and the US
 
+![Deaths Per Day](deaths_per_day.png)
+
+
 I have become frustrated with coverage not showing the most important statistics of the corona virus response.
 In my mind that is deaths per day in the US and NYC.
 
@@ -25,3 +28,4 @@ source activate ml_starter
 
 python my_experiment.py
 ```
+
