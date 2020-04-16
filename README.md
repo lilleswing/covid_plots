@@ -17,7 +17,7 @@ python my_experiment.py
 this will create `deaths_per_day.png` in your current working directory.
 
 ### More Details
-If you want to run in a CI environment
+If you want to run in a CI environment run `devtools/jenkins.sh`
 
 ```bash
 #!/bin/bash
