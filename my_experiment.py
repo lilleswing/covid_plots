@@ -59,37 +59,61 @@ def parse_dates_nyt(df):
     return df
 
 
+def remove_bad_days(df):
+    bad_days = [
+        datetime.datetime(year=2020, month=4, day=16)
+    ]
+
+    def is_bad_day(dt64):
+        my_day = pd.to_datetime(dt64)
+        return my_day in bad_days
+
+    df['is_bad_day'] = df['date'].apply(is_bad_day)
+    print(sum(df['is_bad_day']))
+    return df[~df['is_bad_day']]
+
+
+def clean_up_df(df):
+    df = add_delta_and_rolling_columns(df)
+    if isinstance(df['date'].values[0], str):
+        df = parse_dates_nyt(df)
+    df = remove_bad_days(df)
+    return df
+
+
+def merge_jhu_nyc(jhu_df, nyc_df):
+    nyc_df = jhu_df.merge(nyc_df, on='date', suffixes=('_jhu', '_nyt'))
+    nyc_df['smooth'] = ((nyc_df['delta_jhu'] + nyc_df['delta_nyt']) / 2).rolling(window=3, center=True).mean()
+    return nyc_df
+
+
 def get_nyc_table():
     df = pd.read_csv('us.csv')
     df = df[df['Province_State'] == 'New York']
     df = df[df['Admin2'] == 'New York']
     jhu_table = table_from_dict(df.to_dict())
-    jhu_table = add_delta_and_rolling_columns(jhu_table)
+    jhu_table = clean_up_df(jhu_table)
 
     df = pd.read_csv('nyt-county.csv')
     df = df[df['state'] == 'New York']
     df = df[df['county'] == 'New York City']
-    nyt_table = add_delta_and_rolling_columns(df)
-    nyt_table = parse_dates_nyt(nyt_table)
+    nyt_table = clean_up_df(df)
 
-    nyc_df = jhu_table.merge(nyt_table, on='date', suffixes=('_jhu', '_nyt'))
-    nyc_df['smooth'] = ((nyc_df['delta_jhu'] + nyc_df['delta_nyt']) / 2).rolling(window=3, center=True).mean()
-    return nyc_df
+    merged = merge_jhu_nyc(jhu_table, nyt_table)
+    return merged
 
 
 def get_us_table():
     df = pd.read_csv("global.csv")
     df = df[df['Country/Region'] == 'US']
     jhu_table = table_from_dict(df.to_dict())
-    jhu_table = add_delta_and_rolling_columns(jhu_table)
+    jhu_table = clean_up_df(jhu_table)
 
     df = pd.read_csv('nyt-us.csv')
-    df = add_delta_and_rolling_columns(df)
-    df = parse_dates_nyt(df)
+    df = clean_up_df(df)
 
-    df = jhu_table.merge(df, on='date', suffixes=('_jhu', '_nyt'))
-    df['smooth'] = ((df['delta_jhu'] + df['delta_nyt']) / 2).rolling(window=3, center=True).mean()
-    return df
+    merged = merge_jhu_nyc(jhu_table, df)
+    return merged
 
 
 def save_plots(nyc_table, us_table):
