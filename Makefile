@@ -1,4 +1,4 @@
-.PHONY : clean build
+.PHONY : clean run
 clean:
 	rm -f *.csv *.png
 
