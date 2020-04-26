@@ -4,11 +4,11 @@ def label = "docker-jenkins-${UUID.randomUUID().toString()}"
 podTemplate(label: label,
         containers: [
                 containerTemplate(name: 'jnlp', image: 'jenkins/jnlp-slave:alpine'),
-                containerTemplate(name: 'ubuntu', image: 'ubuntu:18.04', ttyEnabled: true, command: 'cat'),
-            ],
-            volumes: [
-            ],
-        ) {
+                containerTemplate(name: 'ubuntu', image: 'continuumio/miniconda:latest', ttyEnabled: true, command: 'cat'),
+        ],
+        volumes: [
+        ],
+) {
     node(label) {
         dir("${env.WORKSPACE}") {
             stage('Checkout') {
