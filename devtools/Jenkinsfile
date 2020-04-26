@@ -25,7 +25,7 @@ podTemplate(label: label,
             }
 
             stage('package') {
-                echo "Hello World"
+                archiveArtifacts 'deaths_per_day.png, global.csv, us.csv'
             }
         }
     }
