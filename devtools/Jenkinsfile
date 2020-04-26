@@ -1,0 +1,32 @@
+#!/usr/bin/env groovy
+
+def label = "docker-jenkins-${UUID.randomUUID().toString()}"
+podTemplate(label: label,
+        containers: [
+                containerTemplate(name: 'jnlp', image: 'jenkins/jnlp-slave:alpine'),
+                containerTemplate(name: 'ubuntu', image: 'continuumio/miniconda:latest', ttyEnabled: true, command: 'cat'),
+        ],
+        volumes: [
+        ],
+) {
+    node(label) {
+        dir("${env.WORKSPACE}") {
+            stage('Checkout') {
+                timeout(time: 3, unit: 'MINUTES') {
+                    checkout scm
+                }
+            }
+
+            stage('Generate Plots') {
+                container('ubuntu') {
+                    sh '''#!/bin/bash
+                    bash devtools/jenkins.sh'''
+                }
+            }
+
+            stage('package') {
+                archiveArtifacts 'deaths_per_day.png, global.csv, us.csv'
+            }
+        }
+    }
+}

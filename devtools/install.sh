@@ -19,7 +19,7 @@ fi
 export CONDA_EXISTS=`which conda`
 if [[ "$CONDA_EXISTS" = "" ]];
 then
-    wget ${CONDA_URL} -O anaconda.sh;
+    curl ${CONDA_URL} --output anaconda.sh;
     bash anaconda.sh -b -p `pwd`/anaconda
     export PATH=`pwd`/anaconda/bin:$PATH
 else
